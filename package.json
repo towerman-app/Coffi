@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@slack/web-api": "^6.11.2",
+    "express": "^4.18.2",
+    "onoff": "^6.0.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21"
+  }
+}

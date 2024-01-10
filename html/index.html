@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Coffi</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="icon" type="image/x-icon" href="img/coffee.ico">
+</head>
+
+<body>
+    <h1>Welcome to Coffi</h1>
+
+    <div id="bar">
+        <div id="progress-bar">
+            <div id="bar-complete"></div>
+        </div>
+        <h4 id="progress-percent">50%</h4>
+    </div>
+    <div>
+        <h3 id="status">Machine is .....</h3>
+    </div>
+
+    <div class="cta">
+        <button id="brew-btn" disabled>Brew Now</button>
+    </div>
+
+    <div class="cta">
+        <button id="ready-btn" disabled>Mark as Ready</button>
+    </div>
+
+    <div id="brew-length">
+        <h3 id="current-brew-length">Brew time:</h3>
+        <input id="change-brew-length" type="text" placeholder="(seconds)" autocomplete="off">
+        <h6 id="brew-length-btn">Tap to change</h6>
+    </div>
+
+    <p>by noaha</p>
+</body>
+
+<script>
+
+    const statusText = document.getElementById('status');
+    const bar = document.getElementById('bar');
+    const ready_btn = document.getElementById('ready-btn');
+    const brew_btn = document.getElementById('brew-btn');
+    const brew_length_label = document.getElementById('current-brew-length');
+    ready_btn.addEventListener('click', onReady);
+    brew_btn.addEventListener('click', onBrew);
+    document.getElementById('brew-length').addEventListener('click', updateBrewLength);
+    document.getElementById('brew-length-btn').addEventListener('click', saveBrewLength);
+
+    getStatus();
+
+    async function getStatus() {
+        const response = await fetch('/status');
+        const data = (await response.json());
+
+        if (data.error != null) {
+            console.log(data.error);
+            return;
+        }
+
+        // Brew time
+        setBrewLengthLabel(data.brewLength);
+
+        // Status
+        const status = data.status;  // 'empty' | 'ready' | 'brewing' | 'done' = 'empty'
+        if (status == 'empty') {
+            hideBar();
+            changeStatus('empty');
+            brew_btn.disabled = true;
+            ready_btn.disabled = false;
+        } else if (status == 'ready') {
+            hideBar();
+            brew_btn.disabled = false;
+            ready_btn.disabled = true;
+            changeStatus('ready');
+        } else if (status == 'brewing') {
+            animateBar(data.start, data.end);
+            changeStatus('brewing');
+            brew_btn.disabled = true;
+            ready_btn.disabled = true;
+            bar.style.maxHeight = 'fit-content';
+            bar.style.opacity = '1';
+        } else if (status == 'done') {
+            changeStatus('done');
+            ready_btn.disabled = true;
+            brew_btn.disabled = true;
+            hideBar();
+            setTimeout(() => {
+                getStatus();
+            }, 5000);
+        }
+    }
+
+    function hideBar() {
+        bar.style.maxHeight = '0px';
+        bar.style.opacity = '0';
+    }
+
+    async function animateBar(start, end) {
+        const bar_complete = document.getElementById('bar-complete');
+        const text = document.getElementById('progress-percent');
+        let done = false;
+        while (!done) {
+            const now = Math.min(Date.now(), end);
+            const percent = 100-(end-now)/(end-start)*100;
+            if (percent < 10) {
+                bar_complete.style.opacity = percent/10;
+            } else {
+                bar_complete.style.opacity = 1;
+            }
+            bar_complete.style.width = `${percent}%`;
+            text.innerHTML = `${percent.toFixed(0)}%`
+            if (end < Date.now()) {
+                done = true;
+                setTimeout(() => {
+                    getStatus();
+                }, 1000);
+            }
+            await timeout(1000);
+        }
+    }
+
+    async function onReady() {
+        const response = await fetch('/ready', { method: "POST" });
+        const error = await (response.json()).error;
+        getStatus();
+    }
+
+    async function onBrew() {
+        const response = await fetch('/brew', { method: "POST" });
+        const error = await (response.json()).error;
+        getStatus();
+    }
+
+    async function changeStatus(next) {
+        const base = 'Machine is ';
+        const toRemove = statusText.innerHTML.length - base.length;
+        for (let i = 0; i <= toRemove; i++) {
+            statusText.innerHTML = statusText.innerHTML.slice(0, statusText.innerHTML.length - 1);
+            await timeout(80);
+        }
+
+        await timeout(150);
+        statusText.innerHTML += ' ';
+        for (let i = 0; i < next.length; i++) {
+            const char = next[i];
+            statusText.innerHTML += char;
+            await timeout(80);
+        }
+    }
+
+    function updateBrewLength() {
+        const field = document.getElementById('change-brew-length');
+        document.getElementById('brew-length-btn').style.backgroundColor = '#246024';
+        document.getElementById('current-brew-length').style.display = 'none';
+        field.style.display = 'block';
+        document.getElementById('brew-length-btn').innerHTML = 'Save';
+        field.focus();
+    }
+
+    function saveBrewLength() {
+        const field = document.getElementById('change-brew-length');
+        const btn = document.getElementById('brew-length-btn');
+        if (field.style.display == 'block') {
+            const input = field.value;
+            if (input.length > 0 && parseInt(input) != null && parseInt(input) > 0) {
+                brewLengthPost(parseInt(input));
+            }
+            setTimeout(() => {
+                btn.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+                field.style.display = '';
+                btn.innerHTML = 'Tap to change';
+                document.getElementById('current-brew-length').style.display = 'block';
+                console.log('save');
+            }, 100);
+        }
+    }
+
+    async function brewLengthPost(val) {
+        const response = await fetch(`/change-brew-time?time=${val}`, { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+            setBrewLengthLabel(val*1000);
+        }
+    }
+
+    function setBrewLengthLabel(ms) {
+        const s = Math.floor(ms/1000);
+        brew_length_label.innerHTML = 'Brew time:';
+        if (Math.floor(s/60) > 0) {
+            brew_length_label.innerHTML += ` ${Math.floor(s/60).toFixed(0)}min`;
+        }
+        if (s % 60 != 0) {
+            brew_length_label.innerHTML += ` ${(s % 60).toFixed(0)}s`;
+        }
+    }
+
+    function timeout(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+</script>
+
+</html>

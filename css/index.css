@@ -1,0 +1,112 @@
+
+body {
+    background-image: linear-gradient(to bottom, black, #505050);
+    height: 100vh;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    color: white;
+    font-size: 32px;
+}
+
+h1, h3 {
+    color: white;
+    text-align: center;
+}
+
+h3 {
+    background-color: #323232;
+    width: fit-content;
+    padding: 8px 48px;
+    border-radius: 12px;
+}
+
+div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#brew-length {
+    margin-top: 24px;
+    flex-direction: column;
+}
+
+#brew-length * {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+#brew-length h6 {
+    padding: 12px 24px;
+    border-radius: 8px;
+}
+
+#brew-length input {
+    display: none;
+    background-color: #323232;
+    width: fit-content;
+    padding: 8px 48px;
+    border-radius: 12px;
+    border: none;
+    outline-color: white;
+    font-size: larger;
+    color: white;
+}
+
+button:disabled {
+    background-color: #505050;
+    box-shadow: none;
+    color: gray;
+    width: 80%;
+    transition-delay: 0s;
+}
+
+button {
+    color: white;
+    font-size: larger;
+    font-weight: bold;
+    padding: 16px;
+    background-color: #246024;
+    /* outline: gray solid 1px; */
+    box-shadow: black 0 0 24px;
+    border: none;
+    border-radius: 16px;
+    margin: 32px;
+    text-align: center;
+    width: 100%;
+
+    transition: all 0.3s 1s ease-in-out;
+    /* transition: width 0.3s 0.5s ease-in-out; */
+}
+
+p {
+    position: absolute;
+    bottom: 12px;
+}
+
+#progress-bar {
+    display: block;
+    background-color: rgb(50, 50, 50);
+    border-radius: 25px;
+    width: 80%;
+    height: 50px;
+}
+
+#bar-complete {
+    background-color: rgb(50, 150, 50);
+    border-radius: 25px;
+    min-width: 50px;
+    max-width: 100%;
+    /* width: 50%; */
+    height: 50px;
+    transition: all 0.2s ease;;
+}
+
+#progress-percent {
+    margin-left: 12px;
+}
+
+#bar {
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+    max-height: 0px;
+}
