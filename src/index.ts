@@ -8,7 +8,7 @@ app.use('/img', express.static('./img'));
 
 app.use(express.json());
 
-const slackToken = 'xoxb-6449709772069-6455115197380-4b821Ci5VGN1jKOfcWUYogKv';
+const slackToken = 'xoxb-6449709772069-6455115197380-6EABaJlcdBErREs3eFCRVyXF';
 
 var brewLength = 1000 * 60 * 2; // 2min?
 let status: 'empty' | 'ready' | 'brewing' | 'done' = 'empty';
@@ -88,7 +88,7 @@ async function sendSlack() {
         const web = new WebClient(slackToken);
 
         try {
-            web.chat.postMessage({
+            await web.chat.postMessage({
                 text: msg,
                 channel: 'C06DZCEEKPS',
             });
