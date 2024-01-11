@@ -8,7 +8,7 @@ app.use('/img', express.static('./img'));
 
 app.use(express.json());
 
-const slackToken = 'xoxb-6449709772069-6455115197380-6EABaJlcdBErREs3eFCRVyXF';
+const slackToken = 'xoxb-6449709772069-6455115197380-UcEX9wMGyFCeTkyqmRWsl9Ft';
 
 var brewLength = 1000 * 60 * 2; // 2min?
 let status: 'empty' | 'ready' | 'brewing' | 'done' = 'empty';
