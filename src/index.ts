@@ -67,7 +67,7 @@ app.post('/ready', async (req, res) => {
     res.send({ error: null });
 })
 
-const IS_PI = false;
+const IS_PI = true;
 var relay: any = null;
 function activateBrew() {
     if (!IS_PI) { return };
