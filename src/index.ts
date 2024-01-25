@@ -1,8 +1,11 @@
 import * as express from 'express';
 import { networkInterfaces } from 'os';
 import { WebClient } from '@slack/web-api';
+import os = require('os');
+
 
 const app = express();
+const isPi = os.platform() != 'darwin';
 app.use('/css', express.static('./css'));
 app.use('/img', express.static('./img'));
 
@@ -31,6 +34,10 @@ app.get('/status', async (req, res) => {
 });
 
 app.post('/change-brew-time', (req, res) => {
+    if (status == 'brewing') {
+        res.send({ error: 'Cannot change brew time while brewing', success: false });
+        return;
+    }
     if (parseInt(req.query.time?.toString() ?? '') == null) {
         res.send({ error: 'That was not a time', success: false });
         return;
@@ -67,10 +74,12 @@ app.post('/ready', async (req, res) => {
     res.send({ error: null });
 })
 
-const IS_PI = true;
 var relay: any = null;
 function activateBrew() {
-    if (!IS_PI) { return };
+    if (!isPi) {
+        console.log('The machine would brew now');
+        return;
+    }
     if (relay == null) {
         var Gpio = require('onoff').Gpio; //include onoff to interact with the GPIO
         relay = new Gpio(4, 'out'); //use GPIO pin 4, and specify that it is output
@@ -80,6 +89,7 @@ function activateBrew() {
 }
 
 async function sendSlack() {
+    if (!isPi) { return };
     const nets = networkInterfaces();
     const msg = 'Local IP: ' + (nets['wlan0'] ? [1] ? ['address'] : 'Not found' : 'Not found');
     console.log(msg);

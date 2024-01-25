@@ -132,24 +132,28 @@
     async function onBrew() {
         const response = await fetch('/brew', { method: "POST" });
         const error = await (response.json()).error;
+        if (error != null) {
+            console.log(error);
+        }
         getStatus();
     }
 
     async function changeStatus(next) {
         const base = 'Machine is ';
-        const toRemove = statusText.innerHTML.length - base.length;
-        for (let i = 0; i <= toRemove; i++) {
-            statusText.innerHTML = statusText.innerHTML.slice(0, statusText.innerHTML.length - 1);
-            await timeout(80);
-        }
+        statusText.innerHTML = base + next;
+        // const toRemove = statusText.innerHTML.length - base.length;
+        // for (let i = 0; i <= toRemove; i++) {
+        //     statusText.innerHTML = statusText.innerHTML.slice(0, statusText.innerHTML.length - 1);
+        //     await timeout(80);
+        // }
 
-        await timeout(150);
-        statusText.innerHTML += ' ';
-        for (let i = 0; i < next.length; i++) {
-            const char = next[i];
-            statusText.innerHTML += char;
-            await timeout(80);
-        }
+        // await timeout(150);
+        // statusText.innerHTML += ' ';
+        // for (let i = 0; i < next.length; i++) {
+        //     const char = next[i];
+        //     statusText.innerHTML += char;
+        //     await timeout(80);
+        // }
     }
 
     function updateBrewLength() {

@@ -12,7 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const os_1 = require("os");
 const web_api_1 = require("@slack/web-api");
+const os = require("os");
 const app = express();
+const isPi = os.platform() != 'darwin';
 app.use('/css', express.static('./css'));
 app.use('/img', express.static('./img'));
 app.use(express.json());
@@ -35,6 +37,10 @@ app.get('/status', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 }));
 app.post('/change-brew-time', (req, res) => {
     var _a, _b;
+    if (status == 'brewing') {
+        res.send({ error: 'Cannot change brew time while brewing', success: false });
+        return;
+    }
     if (parseInt((_b = (_a = req.query.time) === null || _a === void 0 ? void 0 : _a.toString()) !== null && _b !== void 0 ? _b : '') == null) {
         res.send({ error: 'That was not a time', success: false });
         return;
@@ -66,13 +72,12 @@ app.post('/ready', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     status = 'ready';
     res.send({ error: null });
 }));
-const IS_PI = true;
 var relay = null;
 function activateBrew() {
-    if (!IS_PI) {
+    if (!isPi) {
+        console.log('The machine would brew now');
         return;
     }
-    ;
     if (relay == null) {
         var Gpio = require('onoff').Gpio; //include onoff to interact with the GPIO
         relay = new Gpio(4, 'out'); //use GPIO pin 4, and specify that it is output
@@ -82,6 +87,10 @@ function activateBrew() {
 }
 function sendSlack() {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!isPi) {
+            return;
+        }
+        ;
         const nets = (0, os_1.networkInterfaces)();
         const msg = 'Local IP: ' + (nets['wlan0'] ? [1] ? ['address'] : 'Not found' : 'Not found');
         console.log(msg);
