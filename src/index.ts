@@ -74,15 +74,13 @@ app.post('/ready', async (req, res) => {
     res.send({ error: null });
 })
 
-var relay: any = null;
+// var relay: any = null;
+var Gpio = require('onoff').Gpio; //include onoff to interact with the GPIO
+const relay = new Gpio(4, 'out'); //use GPIO pin 4, and specify that it is output
 function activateBrew() {
     if (!isPi) {
         console.log('The machine would brew now');
         return;
-    }
-    if (relay == null) {
-        var Gpio = require('onoff').Gpio; //include onoff to interact with the GPIO
-        relay = new Gpio(4, 'out'); //use GPIO pin 4, and specify that it is output
     }
     relay.writeSync(1); // turn on
     setTimeout(() => relay.writeSync(0), brewLength); // turn off
@@ -107,7 +105,8 @@ async function sendSlack() {
             break;
         } catch (e) {
             console.log(e);
-            await timeout(5_000);            
+            sent = true;
+            await timeout(5_000);
         }
     }
 }
